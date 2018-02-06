@@ -1,6 +1,6 @@
 {
   "name": "node4progress",
-  "version": "0.1.8",
+  "version": "0.1.11",
   "description": "Connector to Progress Appserver",
   "author": "Frank Hilhorst - Progressive Consulting Inc.",
   "main": "index.js",
@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/FrankHilhorst/node4progress.git"
+    "url": "https://github.com/advancedcsg-open/node4progress.git"
   },
   "keywords": [
     "Progress",
@@ -27,7 +27,7 @@
   ],
   "license": "BSD",
   "bugs": {
-    "url": "https://github.com/FrankHilhorst/node4progress/issues"
+    "url": "https://github.com/advancedcsg-open/node4progress/issues"
   },
-  "homepage": "https://github.com/FrankHilhorst/node4progress"
+  "homepage": "https://github.com/advancedcsg-open/node4progress"
 }

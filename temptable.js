@@ -1,7 +1,8 @@
 
-var Buffer      = require('./buffer.js'),
+var Buffer  = require('./buffer.js'),
     debug		= require('debug'),
-	log			= debug('n4p:temptable');
+    log			= debug('n4p:temptable'),
+  	moment  = require("moment");
 
 function TempTable( iDataset, iName, ttRecordArray, iMetaSchema,iDateFormat ){
 	log( "tt create", iName );
