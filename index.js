@@ -282,7 +282,7 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
       // Deal with when their's no appserver available
       if ((resultStr.toString().indexOf("java.lang.NullPointerException") !== -1) &&
         (resultStr.toString().indexOf("CallAppsvrProc(dispatch.java:148)") !== -1)) {
-        return callback(new Error("Error connecting to the OpenEdge App Server."), null)
+        return callback(new Error("Could not connect to the OpenEdge Application Server."), null)
       }
 
       // Try to parse the result string, if not possible return an error.
