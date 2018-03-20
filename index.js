@@ -373,6 +373,10 @@ node4progress.prototype.getEmptyDataset = function (iDatasetNm, iDatasetProvider
   this.setAppsvrProc("getSchema", "", false, true);
   this.setParameter(iDatasetNm, "dataset-handle", "output", "", iDatasetProvider);
   var dsPromise = new datasetPromise(this, JSON.stringify(this.dynCall), function (err, iJsonDatasetStr) {
+    if (err) {
+      callback(err, null)
+      return
+    }
     var jsonObj = null;
     try {
       jsonObj = JSON.parse(iJsonDatasetStr);
@@ -396,6 +400,10 @@ node4progress.prototype.getEmptyTempTable = function (iTtNm, iTtProvider, callba
   this.setAppsvrProc("getSchema", "", false, true);
   this.setParameter(iTtNm, "table-handle", "output", "", iTtProvider);
   var ttPromise = new tempTablePromise(this, JSON.stringify(this.dynCall), function (err, iJsonDatasetStr) {
+    if (err) {
+      callback(err, null)
+      return
+    }
     var jsonObj = null;
     try {
       jsonObj = JSON.parse(iJsonDatasetStr);
