@@ -285,6 +285,12 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
         return callback(new Error("Could not connect to the OpenEdge Application Server."), null)
       }
 
+      // Deal with the app server goes down after connecting
+      if ((resultStr.toString().indexOf("com.progress.open4gl.Open4GLException") !== -1) &&
+        (resultStr.toString().indexOf("convertToOpen4GLException(ExceptionConverter.java:155)") !== -1)) {
+        return callback(new Error("Could not communicate with the OpenEdge Application Server."), null)
+      }
+
       // Try to parse the result string, if not possible return an error.
       try {
         resultObj = JSON.parse(resultStr);
