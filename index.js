@@ -312,11 +312,13 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
     
     res.on('error', function (e) {
       console.log('http response error: ' + e);
+      callback(new Error(e), null)
     });
   });
 
   post_req.on('error', function (e) {
     console.log('http req error: ' + e);
+    callback(new Error(e), null)
   });
 
   // post the data
