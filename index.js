@@ -274,6 +274,8 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
     });
     res.on('end', function () {
 
+      console.log('httpost result string: ' + resultStr)
+
       // Deal with stopping the node4progress instance
       if (resultStr.toString().indexOf("Stopping->Stop request received") !== -1) {
         return callback(null, JSON.stringify(resultStr))
@@ -306,7 +308,15 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
         callback(null, resultStr)
       };
 
+    }); 
+    
+    res.on('error', function (e) {
+      console.log('http response error: ' + e);
     });
+  });
+
+  post_req.on('error', function (e) {
+    console.log('http req error: ' + e);
   });
 
   // post the data
