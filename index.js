@@ -222,8 +222,12 @@ node4progress.prototype.startWinstone = function () {
     console.log('Winstone error: ' + data);
   });
 
-  this.winstone.on('close', function (code) {
-    console.log('Winstone server exited with code ' + code);
+  this.winstone.on('close', function (code, signal) {
+    console.log('Winstone server closed with code ' + code + ' and signal ' + signal);
+  });
+
+  this.winstone.on('exit', function (code, signal) {
+    console.log('Winstone server exited with code ' + code + ' and signal ' + signal);
   });
 
   if (process.listeners('uncaughtException').length == 0) {
@@ -274,8 +278,6 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
   var retryLimit = 10;
   var retryDelay = 1000;
 
-  var dataCount = 0;
-
   function do_request() {
     console.log('httppost retry count: ' + retryCount)
     // Set up the request
@@ -284,8 +286,6 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
       res.setEncoding('utf8');
       res.on('data', function (chunk) {
         resultStr += chunk;
-        dataCount++
-        console.log('http post data count: ' + dataCount)
       });
       res.on('end', function () {
         // Deal with stopping the node4progress instance
@@ -322,7 +322,6 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
 
         // Try to parse the result string, if not possible return an error.
         try {
-          console.log('Winstone http parsing: ' + resultStr)
           resultObj = JSON.parse(resultStr);
         } catch (err) {
           console.log('Winstone http error parsing: ' + resultStr)
