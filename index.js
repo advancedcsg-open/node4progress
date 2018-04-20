@@ -284,9 +284,6 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
         resultStr += chunk;
       });
       res.on('end', function () {
-
-        console.log('httpost result string: ' + resultStr)
-
         // Deal with stopping the node4progress instance
         if (resultStr.toString().indexOf("Stopping->Stop request received") !== -1) {
           callback(null, JSON.stringify(resultStr))
@@ -350,7 +347,6 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
 
     post_req.on('error', function (e) {
       console.log('Winstone http request error: ' + e);
-
       if (retryCount < retryLimit) {
         retryCount++;
         setTimeout(do_request, retryDelay);
