@@ -284,15 +284,10 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
       res.setEncoding('utf8');
       res.on('data', function (chunk) {
         resultStr += chunk;
-        
-        console.log('http post data count: ' + dataCount)
         dataCount++
-        console.log('http post data chunk: ' + chunk)
+        console.log('http post data count: ' + dataCount)
       });
       res.on('end', function () {
-
-        console.log('http post result: ' + resultStr)
-
         // Deal with stopping the node4progress instance
         if (resultStr.toString().indexOf("Stopping->Stop request received") !== -1) {
           callback(null, JSON.stringify(resultStr))
@@ -327,6 +322,7 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
 
         // Try to parse the result string, if not possible return an error.
         try {
+          console.log('Winstone http parsing: ' + resultStr)
           resultObj = JSON.parse(resultStr);
         } catch (err) {
           console.log('Winstone http error parsing: ' + resultStr)
