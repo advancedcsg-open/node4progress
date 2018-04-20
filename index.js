@@ -274,6 +274,8 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
   var retryLimit = 10;
   var retryDelay = 1000;
 
+  var dataCount = 0;
+
   function do_request() {
     console.log('httppost retry count: ' + retryCount)
     // Set up the request
@@ -282,8 +284,15 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
       res.setEncoding('utf8');
       res.on('data', function (chunk) {
         resultStr += chunk;
+        
+        console.log('http post data count: ' + dataCount)
+        dataCount++
+        console.log('http post data chunk: ' + chunk)
       });
       res.on('end', function () {
+
+        console.log('http post result: ' + resultStr)
+
         // Deal with stopping the node4progress instance
         if (resultStr.toString().indexOf("Stopping->Stop request received") !== -1) {
           callback(null, JSON.stringify(resultStr))
