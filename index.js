@@ -289,7 +289,8 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
 
         // Deal with stopping the node4progress instance
         if (resultStr.toString().indexOf("Stopping->Stop request received") !== -1) {
-          return callback(null, JSON.stringify(resultStr))
+          callback(null, JSON.stringify(resultStr))
+          return
         }
 
         // Deal with when their's no appserver available
@@ -300,7 +301,8 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
             setTimeout(do_request, retryDelay);
             return;
           } else {
-            return callback(new Error("Could not connect to the OpenEdge Application Server."), null)
+            callback(new Error("Could not connect to the OpenEdge Application Server."), null)
+            return
           }          
         }
 
@@ -312,7 +314,8 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
             setTimeout(do_request, retryDelay);
             return;
           } else {
-            return callback(new Error("Could not communicate with the OpenEdge Application Server."), null)
+            callback(new Error("Could not communicate with the OpenEdge Application Server."), null)
+            return
           }   
         }
 
@@ -320,7 +323,8 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
         try {
           resultObj = JSON.parse(resultStr);
         } catch (err) {
-          return callback(new Error(err), null)
+          callback(new Error(err), null)
+          return
         }
 
         // If the resultObj.error is an object i.e. a error specified from the http request
