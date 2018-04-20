@@ -320,6 +320,7 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
         try {
           resultObj = JSON.parse(resultStr);
         } catch (err) {
+          console.log('Winstone http error parsing: ' + resultStr)
           callback(new Error(err), null)
           return
         }
@@ -327,6 +328,7 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
         // If the resultObj.error is an object i.e. a error specified from the http request
         // return that as an error, otherwise just return the resultStr as a success
         if (typeof resultObj.error == "object") {
+          console.log('Winstone http error object: ' + resultStr.error)
           callback(JSON.stringify(resultObj.error), null)
         } else {
           callback(null, resultStr)
