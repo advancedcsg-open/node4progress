@@ -223,20 +223,24 @@ node4progress.prototype.startWinstone = function () {
   });
 
   this.winstone.on('close', function (code) {
-    console.log('Winstome server exited with code ' + code);
+    console.log('Winstone server exited with code ' + code);
   });
 
-  process.on('uncaughtException', function (err) {
-    console.log('Exception: ' + err + "\n" + err.stack);
-    that.winstone.kill('SIGHUP');
-  });
-
-  process.on('SIGHUP', function (err) {
-    console.log('\'SIGHUP\' fired');
-    that.stopWinstone(function (err, result) {
-      console.log("stopWintone->" + result);
+  if (process.listeners('uncaughtException').length == 0) {
+    process.on('uncaughtException', function (err) {
+      console.log('Exception: ' + err + "\n" + err.stack);
+      that.winstone.kill('SIGHUP');
     });
-  });
+  }
+
+  if (process.listeners('SIGHUP').length == 0) {
+    process.on('SIGHUP', function (err) {
+      console.log('\'SIGHUP\' fired');
+      that.stopWinstone(function (err, result) {
+        console.log("stopWintone->" + result);
+      });
+    });
+  }
 
 };
 
@@ -265,65 +269,99 @@ node4progress.prototype.httpPost = function (post_data, content_type, callMethod
       'Content-Length': post_data.length
     }
   };
-  // Set up the request
-  var post_req = http.request(post_options, function (res) {
-    var resultStr = "";
-    res.setEncoding('utf8');
-    res.on('data', function (chunk) {
-      resultStr += chunk;
+
+  var retryCount = 0;
+  var retryLimit = 10;
+  var retryDelay = 1000;
+
+  function do_request() {
+    console.log('httppost retry count: ' + retryCount)
+    // Set up the request
+    var post_req = http.request(post_options, function (res) {
+      var resultStr = "";
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        resultStr += chunk;
+      });
+      res.on('end', function () {
+
+        console.log('httpost result string: ' + resultStr)
+
+        // Deal with stopping the node4progress instance
+        if (resultStr.toString().indexOf("Stopping->Stop request received") !== -1) {
+          return callback(null, JSON.stringify(resultStr))
+        }
+
+        // Deal with when their's no appserver available
+        if ((resultStr.toString().indexOf("java.lang.NullPointerException") !== -1) &&
+          (resultStr.toString().indexOf("CallAppsvrProc(dispatch.java:148)") !== -1)) {
+          if (retryCount < retryLimit) {
+            retryCount++;
+            setTimeout(do_request, retryDelay);
+            return;
+          } else {
+            return callback(new Error("Could not connect to the OpenEdge Application Server."), null)
+          }          
+        }
+
+        // Deal with the app server goes down after connecting
+        if ((resultStr.toString().indexOf("com.progress.open4gl.Open4GLException") !== -1) &&
+          (resultStr.toString().indexOf("convertToOpen4GLException(ExceptionConverter.java:155)") !== -1)) {
+          if (retryCount < retryLimit) {
+            retryCount++;
+            setTimeout(do_request, retryDelay);
+            return;
+          } else {
+            return callback(new Error("Could not communicate with the OpenEdge Application Server."), null)
+          }   
+        }
+
+        // Try to parse the result string, if not possible return an error.
+        try {
+          resultObj = JSON.parse(resultStr);
+        } catch (err) {
+          return callback(new Error(err), null)
+        }
+
+        // If the resultObj.error is an object i.e. a error specified from the http request
+        // return that as an error, otherwise just return the resultStr as a success
+        if (typeof resultObj.error == "object") {
+          callback(JSON.stringify(resultObj.error), null)
+        } else {
+          callback(null, resultStr)
+        };
+
+      }); 
+      
+      res.on('error', function (e) {
+        console.log('Winstone http response error: ' + e);
+        if (retryCount < retryLimit) {
+          retryCount++;
+          setTimeout(do_request, retryDelay);
+        } else {
+          callback(new Error(e), null)
+        }
+      });
     });
-    res.on('end', function () {
 
-      console.log('httpost result string: ' + resultStr)
+    post_req.on('error', function (e) {
+      console.log('Winstone http request error: ' + e);
 
-      // Deal with stopping the node4progress instance
-      if (resultStr.toString().indexOf("Stopping->Stop request received") !== -1) {
-        return callback(null, JSON.stringify(resultStr))
-      }
-
-      // Deal with when their's no appserver available
-      if ((resultStr.toString().indexOf("java.lang.NullPointerException") !== -1) &&
-        (resultStr.toString().indexOf("CallAppsvrProc(dispatch.java:148)") !== -1)) {
-        return callback(new Error("Could not connect to the OpenEdge Application Server."), null)
-      }
-
-      // Deal with the app server goes down after connecting
-      if ((resultStr.toString().indexOf("com.progress.open4gl.Open4GLException") !== -1) &&
-        (resultStr.toString().indexOf("convertToOpen4GLException(ExceptionConverter.java:155)") !== -1)) {
-        return callback(new Error("Could not communicate with the OpenEdge Application Server."), null)
-      }
-
-      // Try to parse the result string, if not possible return an error.
-      try {
-        resultObj = JSON.parse(resultStr);
-      } catch (err) {
-        return callback(new Error(err), null)
-      }
-
-      // If the resultObj.error is an object i.e. a error specified from the http request
-      // return that as an error, otherwise just return the resultStr as a success
-      if (typeof resultObj.error == "object") {
-        callback(JSON.stringify(resultObj.error), null)
+      if (retryCount < retryLimit) {
+        retryCount++;
+        setTimeout(do_request, retryDelay);
       } else {
-        callback(null, resultStr)
-      };
-
-    }); 
-    
-    res.on('error', function (e) {
-      console.log('http response error: ' + e);
-      callback(new Error(e), null)
+        callback(new Error(e), null)
+      }
+      
     });
-  });
 
-  post_req.on('error', function (e) {
-    console.log('http req error: ' + e);
-    callback(new Error(e), null)
-  });
+    // post the data
+    post_req.write(post_data);
+    post_req.end();
+  };
 
-  // post the data
-  post_req.write(post_data);
-  post_req.end();
+  do_request();
 };
 
 node4progress.prototype.stopWinstone = function (callback) {
