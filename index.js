@@ -195,6 +195,9 @@ node4progress.prototype.startWinstone = function () {
     setsid: false
   };
 
+  console.log('winstone dirname: ' + __dirname)
+  console.log('winstone args: ' + args)
+
   this.winstone = this.spawn('java', args, options);
 
   this.winstone.stdout.on('data', function (data) {
