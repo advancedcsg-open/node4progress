@@ -186,8 +186,9 @@ node4progress.prototype.startWinstone = function () {
   this.env.appserverUserPassword = that.appserverUserPassword;
   this.env.appserverSessionModel = that.appserverSessionModel;
   this.env.winstoneSvrPort = that.winstoneSvrPort;
+  this.env.winstonePath = that.winstonePath || __dirname;
 
-  var args = ['-jar', __dirname + '/winstone/winstone-0.9.10.jar', '--warfile', "./webapps/Node4ProgressServlet.war", '--httpPort=' + this.winstoneSvrPort];
+  var args = ['-jar', winstonePath + '/winstone/winstone-0.9.10.jar', '--warfile', "./webapps/Node4ProgressServlet.war", '--httpPort=' + this.winstoneSvrPort];
   var options = {
     cwd: __dirname + "/winstone",
     env: this.env,
