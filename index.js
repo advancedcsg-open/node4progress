@@ -171,6 +171,7 @@ function node4progress(conf) {
   this.appserverUserPassword = this.conf.AppserverPassword;
   this.appserverSessionModel = this.conf.AppserverSessionModel;
   this.winstoneSvrPort = this.conf.WinstoneSvrPort;
+  this.winstonePath = this.conf.WinstonePath || __dirname;
   this.dateFormat = this.conf.DateFormat;
   this.winstone = null;
   this.env = process.env;
@@ -186,18 +187,15 @@ node4progress.prototype.startWinstone = function () {
   this.env.appserverUserPassword = that.appserverUserPassword;
   this.env.appserverSessionModel = that.appserverSessionModel;
   this.env.winstoneSvrPort = that.winstoneSvrPort;
-  this.env.winstonePath = that.winstonePath || __dirname;
+  this.env.winstonePath = that.winstonePath;
 
-  var args = ['-jar', winstonePath + '/winstone/winstone-0.9.10.jar', '--warfile', "./webapps/Node4ProgressServlet.war", '--httpPort=' + this.winstoneSvrPort];
+  var args = ['-jar', this.winstonePath + '/winstone/winstone-0.9.10.jar', '--warfile', this.winstonePath + "/winstone/webapps/Node4ProgressServlet.war", '--httpPort=' + this.winstoneSvrPort];
   var options = {
-    cwd: __dirname + "/winstone",
+    cwd: this.winstonePath + "/winstone",
     env: this.env,
     detached: false,
     setsid: false
   };
-
-  console.log('winstone dirname: ' + __dirname)
-  console.log('winstone args: ' + args)
 
   this.winstone = this.spawn('java', args, options);
 
