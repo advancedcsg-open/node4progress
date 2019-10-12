@@ -8,7 +8,7 @@
   "private": false,
   "dependencies": {
     "numeral": "1.5.x",
-    "debug": "2.x.x",
+    "debug": ">=2.6.9",
     "moment": ">=2.8.3",
     "http": "*"
   },
